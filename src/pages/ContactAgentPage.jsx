@@ -1,6 +1,8 @@
 
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSupabase } from '@/lib/supabase';
+import { toast } from '@/components/ui/use-toast';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +11,44 @@ import { User, Mail, MessageSquare, Phone } from 'lucide-react';
 
 const ContactAgentPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const supabase = useSupabase();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form submission logic would go here
-    alert("Message sent successfully!");
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.target);
+    const data = {
+      property_id: id,
+      full_name: formData.get('fullName'),
+      email: formData.get('email'),
+      phone_number: formData.get('phone'),
+      message: formData.get('message'),
+    };
+
+    try {
+      const { error } = await supabase
+        .from('contact_requests')
+        .insert([data]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Your message has been sent successfully.",
+      });
+      navigate(`/property/${id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -30,6 +65,7 @@ const ContactAgentPage = () => {
                   Full Name
                 </label>
                 <Input 
+                  name="fullName"
                   type="text" 
                   placeholder="Enter your full name"
                   required
@@ -42,6 +78,7 @@ const ContactAgentPage = () => {
                   Email
                 </label>
                 <Input 
+                  name="email"
                   type="email" 
                   placeholder="Enter your email"
                   required
@@ -54,6 +91,7 @@ const ContactAgentPage = () => {
                   Phone Number
                 </label>
                 <Input 
+                  name="phone"
                   type="tel" 
                   placeholder="Enter your phone number"
                   required
@@ -67,6 +105,7 @@ const ContactAgentPage = () => {
                 Message
               </label>
               <Textarea 
+                name="message"
                 placeholder="Type your message here..."
                 className="min-h-[150px]"
                 required
@@ -76,8 +115,9 @@ const ContactAgentPage = () => {
             <Button 
               type="submit"
               className="w-full bg-estate-primary hover:bg-estate-primary-dark"
+              disabled={isSubmitting}
             >
-              Send Message
+              {isSubmitting ? 'Sending...' : 'Send Message'}
             </Button>
           </form>
         </div>

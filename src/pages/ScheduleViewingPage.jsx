@@ -1,6 +1,8 @@
 
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSupabase } from '@/lib/supabase';
+import { toast } from '@/components/ui/use-toast';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +11,46 @@ import { Calendar, Clock, User, Mail, Phone } from 'lucide-react';
 
 const ScheduleViewingPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const supabase = useSupabase();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form submission logic would go here
-    alert("Viewing request submitted successfully!");
+    setIsSubmitting(true);
+
+    const formData = new FormData(e.target);
+    const data = {
+      property_id: id,
+      full_name: formData.get('fullName'),
+      email: formData.get('email'),
+      phone_number: formData.get('phone'),
+      preferred_date: formData.get('date'),
+      preferred_time: formData.get('time'),
+      additional_notes: formData.get('notes'),
+    };
+
+    try {
+      const { error } = await supabase
+        .from('viewing_requests')
+        .insert([data]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Your viewing request has been scheduled successfully.",
+      });
+      navigate(`/property/${id}`);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to schedule viewing. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -30,6 +67,7 @@ const ScheduleViewingPage = () => {
                   Full Name
                 </label>
                 <Input 
+                  name="fullName"
                   type="text" 
                   placeholder="Enter your full name"
                   required
@@ -42,6 +80,7 @@ const ScheduleViewingPage = () => {
                   Email
                 </label>
                 <Input 
+                  name="email"
                   type="email" 
                   placeholder="Enter your email"
                   required
@@ -54,6 +93,7 @@ const ScheduleViewingPage = () => {
                   Phone Number
                 </label>
                 <Input 
+                  name="phone"
                   type="tel" 
                   placeholder="Enter your phone number"
                   required
@@ -66,6 +106,7 @@ const ScheduleViewingPage = () => {
                   Preferred Date
                 </label>
                 <Input 
+                  name="date"
                   type="date" 
                   required
                 />
@@ -77,6 +118,7 @@ const ScheduleViewingPage = () => {
                   Preferred Time
                 </label>
                 <Input 
+                  name="time"
                   type="time" 
                   required
                 />
@@ -86,6 +128,7 @@ const ScheduleViewingPage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
               <Textarea 
+                name="notes"
                 placeholder="Any specific requirements or questions..."
                 className="min-h-[100px]"
               />
@@ -94,8 +137,9 @@ const ScheduleViewingPage = () => {
             <Button 
               type="submit"
               className="w-full bg-estate-primary hover:bg-estate-primary-dark"
+              disabled={isSubmitting}
             >
-              Schedule Viewing
+              {isSubmitting ? 'Scheduling...' : 'Schedule Viewing'}
             </Button>
           </form>
         </div>
