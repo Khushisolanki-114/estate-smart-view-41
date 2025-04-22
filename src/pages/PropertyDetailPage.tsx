@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -131,13 +130,17 @@ const PropertyDetailPage: React.FC = () => {
                 </div>
               </div>
               
-              <Button className="w-full bg-estate-primary hover:bg-estate-primary-dark mb-3">
-                Schedule Viewing
-              </Button>
+              <Link to={`/schedule-viewing/${id}`}>
+                <Button className="w-full bg-estate-primary hover:bg-estate-primary-dark mb-3">
+                  Schedule Viewing
+                </Button>
+              </Link>
               
-              <Button variant="outline" className="w-full">
-                Contact Agent
-              </Button>
+              <Link to={`/contact-agent/${id}`}>
+                <Button variant="outline" className="w-full">
+                  Contact Agent
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

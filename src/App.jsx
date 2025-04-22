@@ -12,6 +12,8 @@ import PropertyDetailPage from "./pages/PropertyDetailPage";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import NotFound from "./pages/NotFound";
+import ScheduleViewingPage from "./pages/ScheduleViewingPage";
+import ContactAgentPage from "./pages/ContactAgentPage";
 
 // Context Providers
 import { AuthProvider } from "./context/AuthContext";
@@ -33,6 +35,8 @@ const App = () => (
               <Route path="/property/:id" element={<PropertyDetailPage />} />
               <Route path="/signin" element={<SignInPage />} />
               <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/schedule-viewing/:id" element={<ScheduleViewingPage />} />
+              <Route path="/contact-agent/:id" element={<ContactAgentPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
