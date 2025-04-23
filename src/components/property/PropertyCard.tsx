@@ -21,7 +21,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
-      <Link to={`/property/${property.id}`} className="relative block h-48 overflow-hidden">
+      <Link to={`/property/${property._id}`} className="relative block h-48 overflow-hidden">
         <img 
           src={property.image} 
           alt={property.title} 
@@ -41,7 +41,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       
       <CardContent className="pt-4 flex-grow">
         <h3 className="text-lg font-semibold mb-2 line-clamp-1">
-          <Link to={`/property/${property.id}`} className="hover:text-estate-primary">
+          <Link to={`/property/${property._id}`} className="hover:text-estate-primary">
             {property.title}
           </Link>
         </h3>

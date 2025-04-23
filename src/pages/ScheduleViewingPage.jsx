@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSupabase } from '@/lib/supabase';
+import { useMongoDB, COLLECTIONS } from '@/lib/mongodb';
 import { toast } from '@/components/ui/use-toast';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Calendar, Clock, User, Mail, Phone } from 'lucide-react';
 const ScheduleViewingPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const supabase = useSupabase();
+  const mongodb = useMongoDB();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -28,12 +28,12 @@ const ScheduleViewingPage = () => {
       preferred_date: formData.get('date'),
       preferred_time: formData.get('time'),
       additional_notes: formData.get('notes'),
+      created_at: new Date().toISOString()
     };
 
     try {
-      const { error } = await supabase
-        .from('viewing_requests')
-        .insert([data]);
+      const { error } = await mongodb.collection(COLLECTIONS.VIEWING_REQUESTS)
+        .insertOne(data);
 
       if (error) throw error;
 

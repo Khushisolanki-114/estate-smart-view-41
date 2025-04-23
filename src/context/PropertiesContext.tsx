@@ -1,8 +1,9 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useMongoDB, COLLECTIONS } from '@/lib/mongodb';
 
 export interface Property {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   price: number;
@@ -37,7 +38,7 @@ const PropertiesContext = createContext<PropertiesContextType | undefined>(undef
 // Sample property data
 const sampleProperties: Property[] = [
   {
-    id: '1',
+    _id: '1',
     title: 'Modern Apartment with City View',
     description: 'A beautiful modern apartment with stunning city views. Features include a fully equipped kitchen, spacious living area, and private balcony. Located in a prime downtown location with easy access to public transportation, restaurants, and shopping centers.',
     price: 1500,
@@ -50,7 +51,7 @@ const sampleProperties: Property[] = [
     featured: true
   },
   {
-    id: '2',
+    _id: '2',
     title: 'Luxury Waterfront Villa',
     description: 'Spectacular waterfront villa with panoramic ocean views. This luxury property features high-end finishes, a private pool, spacious entertainment areas, and direct beach access. Perfect for those seeking a high-end coastal lifestyle.',
     price: 2500000,
@@ -63,7 +64,7 @@ const sampleProperties: Property[] = [
     featured: true
   },
   {
-    id: '3',
+    _id: '3',
     title: 'Cozy Studio in Historic District',
     description: 'Charming studio apartment in a historic building. Features exposed brick walls, hardwood floors, and modern amenities. Ideally located in the heart of the historic district with cafes, boutiques, and cultural attractions just steps away.',
     price: 900,
@@ -76,7 +77,7 @@ const sampleProperties: Property[] = [
     featured: false
   },
   {
-    id: '4',
+    _id: '4',
     title: 'Suburban Family Home',
     description: 'Spacious family home in a quiet suburban neighborhood. Features a large backyard, renovated kitchen, and comfortable living spaces. Located near excellent schools, parks, and shopping centers. Perfect for families looking for a safe and friendly community.',
     price: 450000,
@@ -89,7 +90,7 @@ const sampleProperties: Property[] = [
     featured: false
   },
   {
-    id: '5',
+    _id: '5',
     title: 'Penthouse with Rooftop Terrace',
     description: 'Luxurious penthouse featuring a private rooftop terrace with 360-degree views. This premium property includes high ceilings, floor-to-ceiling windows, and premium finishes throughout. Building amenities include a fitness center, pool, and 24-hour concierge.',
     price: 3500,
@@ -102,7 +103,7 @@ const sampleProperties: Property[] = [
     featured: true
   },
   {
-    id: '6',
+    _id: '6',
     title: 'Mountain Retreat Cabin',
     description: 'Rustic yet modern cabin nestled in the mountains. Features include a stone fireplace, vaulted ceilings, and wraparound deck with breathtaking views. Perfect as a vacation home or for those seeking a peaceful mountain lifestyle away from the city.',
     price: 375000,
@@ -129,14 +130,26 @@ export const PropertiesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   useEffect(() => {
-    // Simulate API fetch
+    // Simulate API fetch from MongoDB
     const fetchProperties = async () => {
       try {
         setLoading(true);
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        // Set sample data
-        setProperties(sampleProperties);
+        const mongodb = useMongoDB();
+        
+        // Initialize the collection with sample data if empty
+        const storedProperties = await mongodb.collection(COLLECTIONS.PROPERTIES).find();
+        
+        if (storedProperties.length === 0) {
+          // Store sample data in MongoDB collection
+          sampleProperties.forEach(async (property) => {
+            await mongodb.collection(COLLECTIONS.PROPERTIES).insertOne(property);
+          });
+          setProperties(sampleProperties);
+        } else {
+          // Use data from MongoDB collection
+          setProperties(storedProperties);
+        }
+        
         setError(null);
       } catch (err) {
         setError('Failed to fetch properties');
@@ -172,7 +185,7 @@ export const PropertiesProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   const getPropertyById = (id: string) => {
-    return properties.find(property => property.id === id);
+    return properties.find(property => property._id === id);
   };
 
   return (

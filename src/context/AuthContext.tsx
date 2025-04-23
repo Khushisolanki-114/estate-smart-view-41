@@ -1,9 +1,10 @@
 
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from '../components/ui/use-toast';
+import { useMongoDB, COLLECTIONS } from '../lib/mongodb';
 
 interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
 }
@@ -19,16 +20,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user database for frontend demo
-const USERS_STORAGE_KEY = 'estate_users';
+// Session storage key
 const CURRENT_USER_KEY = 'estate_current_user';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const mongodb = useMongoDB();
 
   useEffect(() => {
-    // Check for saved user on mount
+    // Check for saved user session on mount
     const savedUser = localStorage.getItem(CURRENT_USER_KEY);
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -44,32 +45,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Check if user already exists
-      const existingUsers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
-      const userExists = existingUsers.some((u: any) => u.email === email);
+      const existingUser = await mongodb.collection(COLLECTIONS.USERS).findOne({ email });
       
-      if (userExists) {
+      if (existingUser) {
         throw new Error('User with this email already exists');
       }
       
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
+      // Create new user in MongoDB
+      const { insertedDoc, error } = await mongodb.collection(COLLECTIONS.USERS).insertOne({
         email,
         name,
         password, // In a real app, NEVER store passwords in plain text
-      };
+      });
       
-      // Save user to "database"
-      localStorage.setItem(
-        USERS_STORAGE_KEY, 
-        JSON.stringify([...existingUsers, newUser])
-      );
+      if (error) throw new Error('Failed to create account');
       
       // Create user session
       const userSession = {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
+        _id: insertedDoc._id,
+        email: insertedDoc.email,
+        name: insertedDoc.name,
       };
       
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(userSession));
@@ -98,11 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate network request
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Find user
-      const existingUsers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
-      const foundUser = existingUsers.find(
-        (u: any) => u.email === email && u.password === password
-      );
+      // Find user in MongoDB
+      const foundUser = await mongodb.collection(COLLECTIONS.USERS).findOne({ 
+        email, 
+        password 
+      });
       
       if (!foundUser) {
         throw new Error('Invalid email or password');
@@ -110,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Create user session
       const userSession = {
-        id: foundUser.id,
+        _id: foundUser._id,
         email: foundUser.email,
         name: foundUser.name,
       };
