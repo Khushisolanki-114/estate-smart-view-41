@@ -14,6 +14,8 @@ import SignUpPage from "./pages/SignUpPage";
 import NotFound from "./pages/NotFound";
 import ScheduleViewingPage from "./pages/ScheduleViewingPage";
 import ContactAgentPage from "./pages/ContactAgentPage";
+import ScheduledMeetingsPage from "./pages/ScheduledMeetingsPage";
+import FavoritesPage from "./pages/FavoritesPage";
 
 // Context Providers
 import { AuthProvider } from "./context/AuthContext";
@@ -37,6 +39,8 @@ const App = () => (
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/schedule-viewing/:id" element={<ScheduleViewingPage />} />
               <Route path="/contact-agent/:id" element={<ContactAgentPage />} />
+              <Route path="/scheduled-meetings" element={<ScheduledMeetingsPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { Home, User, LogOut } from 'lucide-react';
+import { Home, User, LogOut, Calendar, Heart } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -20,7 +20,16 @@ const Navbar: React.FC = () => {
           <Link to="/" className="text-gray-600 hover:text-estate-primary">Home</Link>
           <Link to="/properties" className="text-gray-600 hover:text-estate-primary">Properties</Link>
           {isAuthenticated && (
-            <Link to="/favorites" className="text-gray-600 hover:text-estate-primary">Favorites</Link>
+            <>
+              <Link to="/favorites" className="text-gray-600 hover:text-estate-primary flex items-center gap-1">
+                <Heart className="h-4 w-4" />
+                Favorites
+              </Link>
+              <Link to="/scheduled-meetings" className="text-gray-600 hover:text-estate-primary flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                My Viewings
+              </Link>
+            </>
           )}
         </nav>
 
