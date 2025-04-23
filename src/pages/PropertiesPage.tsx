@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useProperties } from '@/context/PropertiesContext';
 import PropertyCard from '@/components/property/PropertyCard';
@@ -41,7 +42,23 @@ const PropertiesPage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredProperties.map((property) => (
-                  <PropertyCard key={property._id} property={property} />
+                  <div key={property._id} className="flex flex-col">
+                    <PropertyCard property={property} />
+                    <div className="mt-3 flex justify-between">
+                      <Link 
+                        to={`/property/${property._id}`} 
+                        className="inline-flex items-center text-sm text-estate-primary hover:text-estate-primary-dark"
+                      >
+                        View Details
+                      </Link>
+                      <Link 
+                        to={`/schedule-viewing/${property._id}`} 
+                        className="inline-flex items-center text-sm text-estate-primary hover:text-estate-primary-dark"
+                      >
+                        Schedule Viewing
+                      </Link>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
